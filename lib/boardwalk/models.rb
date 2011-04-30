@@ -4,16 +4,16 @@ unless MONGO_USER  == ''
   MongoMapper.database.authenticate(MONGO_USER, MONGO_PASSWORD)
 end
 
-module IdentityMapAddition 
-  def self.included(model) 
-    model.plugin MongoMapper::Plugins::IdentityMap 
-  end 
-end 
+module IdentityMapAddition
+  def self.included(model)
+    model.plugin MongoMapper::Plugins::IdentityMap
+  end
+end
 MongoMapper::Document.append_inclusions(IdentityMapAddition)
 
 class User
   include MongoMapper::Document
-  
+
   key :login,         String,   :length => (3..40), :required => true
   key :password,      String,   :limit => 40,       :required => true
   key :email,         String,   :limit => 64
@@ -23,12 +23,12 @@ class User
   key :activated_at,  Time
   key :superuser,     Boolean,  :default => false
   key :deleted,       Boolean,  :default => false
-  
+
   validates_uniqueness_of :login
   validates_uniqueness_of :s3key
-  
+
   many :buckets
-  
+
   # before_save :convert_pass
   # after_save :revert_pass
   private
@@ -47,7 +47,7 @@ end
 class Bucket
   # include MongoMapper::EmbeddedDocument
   include MongoMapper::Document
-  
+
   key :user_id,     ObjectId
   key :type,        String,   :length => 6
   key :name,        String,   :length => 255, :format => /^[-\w]+$/
@@ -55,12 +55,12 @@ class Bucket
   key :updated_at,  Time
   key :access,      Integer
   key :meta,        String
-  
+
   validates_uniqueness_of :name
-  
+
   belongs_to :user
   many :slots
-    
+
   def access_readable
       name, _ = CANNED_ACLS.find { |k, v| v == self.access }
       if name
@@ -100,16 +100,16 @@ class Slot
   # include MongoMapper::EmbeddedDocument
   include MongoMapper::Document
   plugin Joint
-  
+
   attachment :bit
-  
+
   key :bucket_id,   ObjectId
   key :access,      Integer
   key :created_at,  Time
   key :updated_at,  Time
-  
+
   belongs_to :bucket
-  
+
   def access_readable
       name, _ = CANNED_ACLS.find { |k, v| v == self.access }
       if name
@@ -148,7 +148,7 @@ if User.all.size == 0
                       :password => DEFAULT_PASSWORD,
                       :email => "",
                       :s3key => "44CF9590006BF252F707",
-                      :s3secret => DEFAULT_SECRET,
+                      :s3secret => "DEFAULT_SECRET",
                       :created_at => Time.now,
                       :activated_at => Time.now,
                       :superuser => true
