@@ -13,7 +13,7 @@ end
 
 desc ''
 task :start do
-  sh 'bundle exec ruby bin/boardwalk.rb'
+  sh 'bin/boardwalk'
 end
 
 desc ''

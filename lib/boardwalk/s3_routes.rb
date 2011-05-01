@@ -239,6 +239,9 @@ module Boardwalk
     delete %r{/([^\/]+)/?} do
       puts "\e[1;32mLine 225: delete %r{/([^\/]+)/?}\e[0m"
 
+      pp params
+      pp env
+
       aws_authenticate
 
       bucket = Bucket.all(:conditions => {:name => params[:captures].first}).first

@@ -1,14 +1,15 @@
+#!/usr/bin/env ruby
+
 $:.unshift "#{File.dirname(__FILE__)}/../lib"
 
-require 'rubygems'
-require 'optparse'
-require 'sinatra'
 require 'bundler'
-require 'eventmachine'
-require 'thin'
 
 Bundler.setup
 
+require 'optparse'
+require 'sinatra/base'
+require 'eventmachine'
+require 'thin'
 require 'builder'
 require 'fiber'
 require 'rack/fiber_pool'
@@ -33,15 +34,15 @@ else
   options = OpenStruct.new
 end
 
-options.host = '127.0.0.1' if options.host.nil?
-options.port = 4567 if options.port.nil?
-options.environment = :production if options.environment.nil?
-options.server = 'thin' if options.server.nil?
-options.mongodb_host = 'localhost' if options.mongodb_host.nil?
-options.mongodb_port = 27017 if options.mongodb_port.nil?
-options.mongodb_prefix = 'boardwalk' if options.mongodb_prefix.nil?
-options.mongodb_user = '' if options.mongodb_user.nil?
-options.mongodb_password = '' if options.mongodb_password.nil?
+options.host             = '127.0.0.1' if options.host.nil?
+options.port             = 4567        if options.port.nil?
+options.environment      = :production if options.environment.nil?
+options.server           = 'thin'      if options.server.nil?
+options.mongodb_host     = 'localhost' if options.mongodb_host.nil?
+options.mongodb_port     = 27017       if options.mongodb_port.nil?
+options.mongodb_prefix   = 'boardwalk' if options.mongodb_prefix.nil?
+options.mongodb_user     = ''          if options.mongodb_user.nil?
+options.mongodb_password = ''          if options.mongodb_password.nil?
 
 opts = OptionParser.new do |opts|
   opts.banner = "Usage: boardwalk [options] [host] [port]"
