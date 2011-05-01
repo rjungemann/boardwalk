@@ -1,5 +1,10 @@
+require 'mongo'
+require 'mongo_mapper'
+require 'boardwalk/models'
+
 MongoMapper.connection = Mongo::Connection.new(MONGO_HOST, MONGO_PORT)
 MongoMapper.database = MONGO_DB
+
 unless MONGO_USER  == ''
   MongoMapper.database.authenticate(MONGO_USER, MONGO_PASSWORD)
 end
@@ -9,6 +14,7 @@ module IdentityMapAddition
     model.plugin MongoMapper::Plugins::IdentityMap
   end
 end
+
 MongoMapper::Document.append_inclusions(IdentityMapAddition)
 
 class User
@@ -32,16 +38,19 @@ class User
   # before_save :convert_pass
   # after_save :revert_pass
   private
-    def hmac_sha1(key, s)
-      return Base64.encode64(OpenSSL::HMAC.digest(OpenSSL::Digest::Digest.new("sha1"), key, s)).strip
-    end
-    def convert_pass
-        @password_clean = self.password
-        self.password = hmac_sha1(self.password, self.s3secret)
-    end
-    def revert_pass
-        self.password = @password_clean
-    end
+
+  def hmac_sha1(key, s)
+    return Base64.encode64(OpenSSL::HMAC.digest(OpenSSL::Digest::Digest.new("sha1"), key, s)).strip
+  end
+
+  def convert_pass
+      @password_clean = self.password
+      self.password = hmac_sha1(self.password, self.s3secret)
+  end
+
+  def revert_pass
+      self.password = @password_clean
+  end
 end
 
 class Bucket
@@ -62,43 +71,54 @@ class Bucket
   many :slots
 
   def access_readable
-      name, _ = CANNED_ACLS.find { |k, v| v == self.access }
-      if name
-          name
-      else
-          [0100, 0010, 0001].map do |i|
-              [[4, 'r'], [2, 'w'], [1, 'x']].map do |k, v|
-                  (self.access & (i * k) == 0 ? '-' : v )
-              end
-          end.join
-      end
+    name, _ = CANNED_ACLS.find { |k, v| v == self.access }
+
+    if name
+      name
+    else
+      [0100, 0010, 0001].map { |i|
+        [[4, 'r'], [2, 'w'], [1, 'x']].map { |k, v|
+          (self.access & (i * k) == 0 ? '-' : v )
+        }
+      }.join
+    end
   end
+
   # def self.readable_by? bucket
-  #     check_access(bucket.user, READABLE_BY_AUTH, READABLE)
+  #   check_access(bucket.user, READABLE_BY_AUTH, READABLE)
   # end
+
   def readable_by? user
-      check_access(user, READABLE_BY_AUTH, READABLE)
+    check_access(user, READABLE_BY_AUTH, READABLE)
   end
+
   def owned_by? passed_user
-      passed_user and user.login == passed_user.login
+    passed_user and user.login == passed_user.login
   end
+
   def writable_by? current_user
-      check_access(current_user, WRITABLE_BY_AUTH, WRITABLE)
+    check_access(current_user, WRITABLE_BY_AUTH, WRITABLE)
   end
+
   # private
+
   def check_access user, group_perm, user_perm
-      !!( if owned_by?(user) or (user and (access > 0 && group_perm > 0)) or (access > 0 && user_perm > 0)
-              true
-          elsif user
-              acl = users.find(user.id) rescue nil
-              acl and acl.access.to_i & user_perm
-          end )
+    !!(
+      if owned_by?(user) or (user and (access > 0 && group_perm > 0)) or (access > 0 && user_perm > 0)
+        true
+      elsif user
+        acl = users.find(user.id) rescue nil
+        acl and acl.access.to_i & user_perm
+      end
+    )
   end
 end
 
 class Slot
   # include MongoMapper::EmbeddedDocument
+
   include MongoMapper::Document
+
   plugin Joint
 
   attachment :bit
@@ -111,49 +131,59 @@ class Slot
   belongs_to :bucket
 
   def access_readable
-      name, _ = CANNED_ACLS.find { |k, v| v == self.access }
-      if name
-          name
-      else
-          [0100, 0010, 0001].map do |i|
-              [[4, 'r'], [2, 'w'], [1, 'x']].map do |k, v|
-                  (self.access & (i * k) == 0 ? '-' : v )
-              end
-          end.join
-      end
+    name, _ = CANNED_ACLS.find { |k, v| v == self.access }
+
+    if name
+      name
+    else
+      [0100, 0010, 0001].map { |i|
+        [[4, 'r'], [2, 'w'], [1, 'x']].map { |k, v|
+          (self.access & (i * k) == 0 ? '-' : v )
+        }
+      }.join
+    end
   end
+
   def readable_by? current_user
-      check_access(current_user, READABLE_BY_AUTH, READABLE)
+    check_access(current_user, READABLE_BY_AUTH, READABLE)
   end
+
   def owned_by? current_user
-      current_user and bucket.user.login == current_user.login
+    current_user and bucket.user.login == current_user.login
   end
+
   def writable_by? current_user
-      check_access(current_user, WRITABLE_BY_AUTH, WRITABLE)
+    check_access(current_user, WRITABLE_BY_AUTH, WRITABLE)
   end
+
   def check_access user, group_perm, user_perm
-      !!( if owned_by?(user) or (user and (access > 0 && group_perm > 0)) or (access > 0 && user_perm > 0)
-              true
-          elsif user
-              acl = users.find(user.id) rescue nil
-              acl and acl.access.to_i & user_perm
-          end )
+    !!(
+      if owned_by?(user) or (user and (access > 0 && group_perm > 0)) or (access > 0 && user_perm > 0)
+        true
+      elsif user
+        acl = users.find(user.id) rescue nil
+        acl and acl.access.to_i & user_perm
+      end
+    )
   end
 end
 
 if User.all.size == 0
   puts "*** No users found! Creating user 'admin'..."
+
   user = User.create({
-                      :login => "admin",
-                      :password => DEFAULT_PASSWORD,
-                      :email => "",
-                      :s3key => "44CF9590006BF252F707",
-                      :s3secret => "DEFAULT_SECRET",
-                      :created_at => Time.now,
-                      :activated_at => Time.now,
-                      :superuser => true
-                    })
+    :login => "admin",
+    :password => DEFAULT_PASSWORD,
+    :email => "",
+    :s3key => "44CF9590006BF252F707",
+    :s3secret => DEFAULT_SECRET,
+    :created_at => Time.now,
+    :activated_at => Time.now,
+    :superuser => true
+  })
+
   user.password = Base64.encode64(OpenSSL::HMAC.digest(OpenSSL::Digest::Digest.new("sha1"), user.password, user.s3secret)).strip
+
   if user.save
     puts "*** User 'admin' created! Please log in at http://#{BIND_HOST}/control/login using the following credentials:"
     puts "\tLogin: admin\n\tPassword:#{DEFAULT_PASSWORD}"

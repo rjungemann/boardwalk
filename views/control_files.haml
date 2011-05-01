@@ -1,57 +1,57 @@
 %p
-	Click on a file name to get file and torrent details.
+  Click on a file name to get file and torrent details.
 %table
-	%caption
-		%a{:href => '/control/buckets'}
-			&larr; Buckets
-	%thead
-		%th
-			File
-		%th
-			Size
-		%th
-			Permission
-	%tbody
-		-if @files and !@files.empty?
-			- @files.each do |file|
-				%tr
-					%th
-						%a{:href => "javascript://", :onclick => "$('#details-#{file.id}').toggle()"}
-							= file.file_name
-						%div.details{:id => "details-#{file.id}"}
-							%p
-								Last modified on #{file.bit.upload_date}
-								%form.deletion
-									%input{:type => "hidden", :value => "#{file.bucket.name}", :name => "bucket_name", :class => "bucket_name"}
-									%input{:type => "hidden", :value => "file", :name => "deletion_type", :class => "deletion_type"}
-									%input{:type => "hidden", :value => "#{file.file_name}", :name => "file_name", :class => "file_name"}
-								%a{:href => "/control/buckets/#{file.bucket.name}/#{file.file_name}", :title => "Download file #{file.file_name}"}
-									Download
-								&nbsp;
-								%a.delete_file{:title => "Delete file #{file.file_name}", :style => "cursor:pointer;"}
-									Delete
-					%td
-						= file.bit_size
-					%td
-						= file.access_readable
+  %caption
+    %a{:href => '/control/buckets'}
+      &larr; Buckets
+  %thead
+    %th
+      File
+    %th
+      Size
+    %th
+      Permission
+  %tbody
+    -if @files and !@files.empty?
+      - @files.each do |file|
+        %tr
+          %th
+            %a{:href => "javascript://", :onclick => "$('#details-#{file.id}').toggle()"}
+              = file.file_name
+            %div.details{:id => "details-#{file.id}"}
+              %p
+                Last modified on #{file.bit.upload_date}
+                %form.deletion
+                  %input{:type => "hidden", :value => "#{file.bucket.name}", :name => "bucket_name", :class => "bucket_name"}
+                  %input{:type => "hidden", :value => "file", :name => "deletion_type", :class => "deletion_type"}
+                  %input{:type => "hidden", :value => "#{file.file_name}", :name => "file_name", :class => "file_name"}
+                %a{:href => "/control/buckets/#{file.bucket.name}/#{file.file_name}", :title => "Download file #{file.file_name}"}
+                  Download
+                &nbsp;
+                %a.delete_file{:title => "Delete file #{file.file_name}", :style => "cursor:pointer;"}
+                  Delete
+          %td
+            = file.bit_size
+          %td
+            = file.access_readable
 %h3
-	"Upload a File"
+  "Upload a File"
 %form{:action => "?upload_id=#{Time.now.to_f}", :method => 'post', :enctype => 'multipart/form-data', :class => 'create'}
-	%div.required
-		%input{:name => 'upfile', :type => 'file'}
-	%div.optional
-		%label
-			File Name
-		%input{:name => 'fname', :type => 'text'}
-	%div.required
-		%label{:for => 'facl'}
-			'Permissions'
-		%select{:name => 'facl'}
-			- CANNED_ACLS.sort.each do |acl, perm|
-				- if @bucket && perm == @bucket.access
-					%option{:value => "#{perm}", :selected => true}
-						= acl
-				- else
-					%option{:value => "#{perm}"}
-						= acl
-	%input.newfile{:type => 'submit', :value => "Create"}
+  %div.required
+    %input{:name => 'upfile', :type => 'file'}
+  %div.optional
+    %label
+      File Name
+    %input{:name => 'fname', :type => 'text'}
+  %div.required
+    %label{:for => 'facl'}
+      'Permissions'
+    %select{:name => 'facl'}
+      - CANNED_ACLS.sort.each do |acl, perm|
+        - if @bucket && perm == @bucket.access
+          %option{:value => "#{perm}", :selected => true}
+            = acl
+        - else
+          %option{:value => "#{perm}"}
+            = acl
+  %input.newfile{:type => 'submit', :value => "Create"}

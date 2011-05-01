@@ -1,64 +1,64 @@
 %br
 -if @buckets && !@buckets.nil?
-	%table
-		%thead
-			%tr
-				%th
-					Name
-				%th
-					Contains
-				%th
-					Updated on
-				%th
-					Permission
-				%th
-					Actions
-		%tbody
-			-@buckets.each do |bucket|
-				%tr{:id => "#{bucket.name}"}
-					%th
-						%a{:href => '/control/buckets/' + bucket.name}
-							= bucket.name
-					%td
-						= bucket.slots.size rescue 0
-						- if bucket.slots.size == 1
-							&nbsp;file
-						- else
-							&nbsp;files
-					%td
-						= bucket.updated_at || bucket.created_at
-					%td
-						= bucket.access_readable
-					%td
-						%form.deletion
-							%input{:type => "hidden", :value => "#{bucket.name}", :name => "bucket_name", :class => "bucket_name"}
-							%input{:type => "hidden", :value => "bucket", :name => "deletion_type", :class => "deletion_type"}
-						%a.delete_bucket{:title => "Delete bucket #{bucket.name}", :style => "cursor:pointer;"}
-							Delete
+  %table
+    %thead
+      %tr
+        %th
+          Name
+        %th
+          Contains
+        %th
+          Updated on
+        %th
+          Permission
+        %th
+          Actions
+    %tbody
+      -@buckets.each do |bucket|
+        %tr{:id => "#{bucket.name}"}
+          %th
+            %a{:href => '/control/buckets/' + bucket.name}
+              = bucket.name
+          %td
+            = bucket.slots.size rescue 0
+            - if bucket.slots.size == 1
+              &nbsp;file
+            - else
+              &nbsp;files
+          %td
+            = bucket.updated_at || bucket.created_at
+          %td
+            = bucket.access_readable
+          %td
+            %form.deletion
+              %input{:type => "hidden", :value => "#{bucket.name}", :name => "bucket_name", :class => "bucket_name"}
+              %input{:type => "hidden", :value => "bucket", :name => "deletion_type", :class => "deletion_type"}
+            %a.delete_bucket{:title => "Delete bucket #{bucket.name}", :style => "cursor:pointer;"}
+              Delete
 -else
-	%p
-		A sad day. You have no buckets yet.
+  %p
+    A sad day. You have no buckets yet.
 %br
 %h3
-	Create a Bucket
+  Create a Bucket
 %form{:method => 'post', :class => 'create'}
-	-# errors_for @bucket
-	.required
-		%label{:for => 'bucket_name'}
-			Bucket Name
-		-if @bucket
-			%input{:name => 'bucket_name', :type => 'text', :value => @bucket.name}
-		-else
-			%input{:name => 'bucket_name', :type => 'text'}
-	.required
-		%label{:for => 'bucket_access'}
-			Permissions
-		%select{:name => 'bucket_access'}
-			-CANNED_ACLS.sort.each do |acl, perm|
-				-if @bucket && perm == @bucket.access
-					%option{:value => perm, :selected => true}
-						= acl
-				-else
-					%option{:value => perm}
-						= acl
-	%input{:type => "submit", :name => "newbucket", :value => "Create"}
+  -# errors_for @bucket
+  .required
+    %label{:for => 'bucket_name'}
+      Bucket Name
+    -if @bucket
+      %input{:name => 'bucket_name', :type => 'text', :value => @bucket.name}
+    -else
+      %input{:name => 'bucket_name', :type => 'text'}
+  .required
+    %label{:for => 'bucket_access'}
+      Permissions
+    %select{:name => 'bucket_access'}
+      -CANNED_ACLS.sort.each do |acl, perm|
+        -if @bucket && perm == @bucket.access
+          %option{:value => perm, :selected => true}
+            = acl
+        -else
+          %option{:value => perm}
+            = acl
+  %input{:type => "submit", :name => "newbucket", :value => "Create"}

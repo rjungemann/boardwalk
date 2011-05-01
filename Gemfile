@@ -1,4 +1,5 @@
 source :gemcutter
+
 gem 'haml', '~> 3.0'
 gem 'mongo_mapper', '~> 0.8'#, '0.8.2'
 gem 'builder', '2.1.2'
@@ -18,4 +19,7 @@ gem 'wand', '0.2.1'
 gem 'rack'#, '1.2.1'
 gem 'sinatra', '>= 0.9.2'
 gem 'tilt', '>= 1.1'
-gem 'aws-s3'
+gem 'right_aws'
+
+gem 'ruby-debug-base19', "0.11.24"
+gem 'ruby-debug19', "0.11.6"

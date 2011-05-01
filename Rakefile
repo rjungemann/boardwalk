@@ -1,4 +1,14 @@
 desc ''
 task :mongo_start do
-  sh "mongod run --config mongod.conf"
+  sh 'mongod run --config mongod.conf'
+end
+
+desc ''
+task :start do
+  sh 'bundle exec ruby bin/boardwalk.rb'
+end
+
+desc ''
+task :spec do
+  sh 'bundle exec rspec spec/boardwalk.rb'
 end
