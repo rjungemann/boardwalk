@@ -79,6 +79,10 @@ module Boardwalk
         raise AccessDenied unless bucket.readable_by? @user
       end
 
+      def aws_only_can_write(bucket)
+        raise AccessDenied unless bucket.writeable_by? @user
+      end
+
       def check_credentials(username, password)
         user = User.first(:login => username)
         if user.password == hmac_sha1(password, user.s3secret)

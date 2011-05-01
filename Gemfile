@@ -20,6 +20,12 @@ gem 'rack'#, '1.2.1'
 gem 'sinatra', '>= 0.9.2'
 gem 'tilt', '>= 1.1'
 gem 'right_aws'
+gem 'right_http_connection'
 
 gem 'ruby-debug-base19', "0.11.24"
 gem 'ruby-debug19', "0.11.6"
+
+gem 'rspec'
+gem 'artifice'
+gem 'capybara'
+gem 'akephalos'

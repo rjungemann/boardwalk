@@ -134,7 +134,7 @@ module Boardwalk
   class App < Sinatra::Base
     configure do
       set :environment, $options.environment.to_sym
-      set :root, File.dirname(__FILE__).to_s+'/../'
+      set :root, File.dirname(__FILE__).to_s + '/../'
 
       set :server, $options.server
       set :bind, $options.host
@@ -160,6 +160,4 @@ end
 
 require 'boardwalk/models'
 
-EventMachine.run do
-  Rack::Handler::Thin.run(Boardwalk::App.new, { :Port => 4567 })
-end
+Rack::Handler::Thin.run(Boardwalk::App.new, { :Port => 4567 })

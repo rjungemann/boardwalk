@@ -1,3 +1,4 @@
+require 'pp'
 require 'sinatra'
 require 'rack/fiber_pool'
 

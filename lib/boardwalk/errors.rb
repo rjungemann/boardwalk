@@ -7,6 +7,7 @@ module Boardwalk
     class BadDigest < StandardError; end
     class BucketAlreadyExists < StandardError; end
     class BucketNotEmpty < StandardError; end
+    class SlotAlreadyExists < StandardError; end
     class CredentialsNotSupported < StandardError; end
     class EntityTooLarge < StandardError; end
     class IncompleteBody < StandardError; end
@@ -61,6 +62,10 @@ module Boardwalk
 
     error BucketNotEmpty do
       throw :halt, [409, 'The bucket you tried to delete is not empty.']
+    end
+
+    error SlotAlreadyExists do
+      throw :halt, [409, 'The slot you tried to create already exists.']
     end
 
     error CredentialsNotSupported do
